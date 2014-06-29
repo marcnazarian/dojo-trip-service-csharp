@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 using NUnit.Framework.Constraints;
 
 using TripServiceKata.Trip;
@@ -10,7 +11,11 @@ namespace TripServiceKata.Tests
     {
         public const User.User GUEST = null;
         public readonly User.User A_USER = new User.User();
-        
+        public readonly User.User REGISTERED_USER = new User.User();
+        public readonly User.User ANOTHER_USER = new User.User();
+
+        public readonly Trip.Trip BRASIL = new Trip.Trip();
+
         private static User.User loggedInUser;
         
         [Test]
@@ -18,10 +23,23 @@ namespace TripServiceKata.Tests
         public void it_should_validate_the_user_is_logged_in()
         {
             TripServiceForTests tripService = new TripServiceForTests();
-
             loggedInUser = GUEST;
 
             tripService.GetTripsByUser(A_USER);
+        }
+
+        [Test]
+        public void it_should_not_return_any_trips_when_users_are_not_friends()
+        {
+            TripServiceForTests tripService = new TripServiceForTests();
+            loggedInUser = REGISTERED_USER;
+            User.User stranger = new User.User();
+            stranger.AddFriend(ANOTHER_USER);
+            stranger.AddTrip(BRASIL);
+
+            List<Trip.Trip> trips = tripService.GetTripsByUser(stranger);
+
+            Assert.That(trips, Is.Empty);
         }
 
         private class TripServiceForTests : TripService
