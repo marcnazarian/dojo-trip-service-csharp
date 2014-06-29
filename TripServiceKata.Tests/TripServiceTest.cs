@@ -5,6 +5,8 @@ using NUnit.Framework.Constraints;
 using TripServiceKata.Trip;
 using TripServiceKata.User;
 
+using NSubstitute;
+
 namespace TripServiceKata.Tests
 {
     public class TripServiceTest
@@ -17,12 +19,15 @@ namespace TripServiceKata.Tests
         public readonly Trip.Trip BRASIL = new Trip.Trip();
         public readonly Trip.Trip LONDON = new Trip.Trip();
 
-        private TripServiceForTests tripService;
+        private TripService tripService;
+
+        private ITripDAO tripDAO;
 
         [SetUp]
         public void setUp()
         {
-            tripService = new TripServiceForTests();
+            tripDAO = Substitute.For<ITripDAO>();
+            tripService = new TripService(tripDAO);
         }
 
         [Test]
@@ -39,6 +44,7 @@ namespace TripServiceKata.Tests
                 .friendWith(ANOTHER_USER)
                 .withTrips(BRASIL)
                 .build();
+            tripDAO.TripsByUser(stranger).Returns(stranger.Trips());
 
             List<Trip.Trip> trips = tripService.GetTripsByUser(stranger, REGISTERED_USER);
 
@@ -52,20 +58,13 @@ namespace TripServiceKata.Tests
                 .friendWith(ANOTHER_USER, REGISTERED_USER)
                 .withTrips(BRASIL, LONDON)
                 .build();
+            tripDAO.TripsByUser(friend).Returns(friend.Trips());
 
             List<Trip.Trip> trips = tripService.GetTripsByUser(friend, REGISTERED_USER);
 
             Assert.That(trips.Count, Is.EqualTo(2));
         }
 
-
-        private class TripServiceForTests : TripService
-        {
-            protected override List<Trip.Trip> TripsByUser(User.User user)
-            {
-                return user.Trips();
-            }
-        }
     }
 
 }
