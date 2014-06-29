@@ -24,6 +24,7 @@ namespace TripServiceKata.Tests
         public void setUp()
         {
             tripService = new TripServiceForTests();
+            loggedInUser = REGISTERED_USER;
         }
 
         [Test]
@@ -38,11 +39,10 @@ namespace TripServiceKata.Tests
         [Test]
         public void it_should_not_return_any_trips_when_users_are_not_friends()
         {
-            loggedInUser = REGISTERED_USER;
-            
-            User.User stranger = new User.User();
-            stranger.AddFriend(ANOTHER_USER);
-            stranger.AddTrip(BRASIL);
+            User.User stranger = UserBuilder.aUser()
+                .friendWith(ANOTHER_USER)
+                .withTrips(BRASIL)
+                .build();
 
             List<Trip.Trip> trips = tripService.GetTripsByUser(stranger);
 
@@ -52,18 +52,16 @@ namespace TripServiceKata.Tests
         [Test]
         public void it_should_return_trips_when_users_are_friends()
         {
-            loggedInUser = REGISTERED_USER;
-
-            User.User friend = new User.User();
-            friend.AddFriend(ANOTHER_USER);
-            friend.AddFriend(REGISTERED_USER);
-            friend.AddTrip(BRASIL);
-            friend.AddTrip(LONDON);
+            User.User friend = UserBuilder.aUser()
+                .friendWith(ANOTHER_USER, REGISTERED_USER)
+                .withTrips(BRASIL, LONDON)
+                .build();
 
             List<Trip.Trip> trips = tripService.GetTripsByUser(friend);
 
             Assert.That(trips.Count, Is.EqualTo(2));
         }
+
 
         private class TripServiceForTests : TripService
         {
