@@ -20,7 +20,6 @@ namespace TripServiceKata.Tests
         public readonly Trip.Trip LONDON = new Trip.Trip();
 
         private TripService tripService;
-
         private ITripDAO tripDAO;
 
         [SetUp]
@@ -38,6 +37,20 @@ namespace TripServiceKata.Tests
         }
 
         [Test]
+        public void it_should_return_trips_when_users_are_friends()
+        {
+            User.User friend = UserBuilder.aUser()
+                .friendWith(ANOTHER_USER, REGISTERED_USER)
+                .withTrips(BRASIL, LONDON)
+                .build();
+            tripDAO.TripsByUser(friend).Returns(friend.Trips());
+
+            List<Trip.Trip> trips = tripService.GetTripsByUser(friend, REGISTERED_USER);
+
+            Assert.That(trips.Count, Is.EqualTo(2));
+        }
+
+        [Test]
         public void it_should_not_return_any_trips_when_users_are_not_friends()
         {
             User.User stranger = UserBuilder.aUser()
@@ -51,19 +64,6 @@ namespace TripServiceKata.Tests
             Assert.That(trips, Is.Empty);
         }
 
-        [Test]
-        public void it_should_return_trips_when_users_are_friends()
-        {
-            User.User friend = UserBuilder.aUser()
-                .friendWith(ANOTHER_USER, REGISTERED_USER)
-                .withTrips(BRASIL, LONDON)
-                .build();
-            tripDAO.TripsByUser(friend).Returns(friend.Trips());
-
-            List<Trip.Trip> trips = tripService.GetTripsByUser(friend, REGISTERED_USER);
-
-            Assert.That(trips.Count, Is.EqualTo(2));
-        }
 
     }
 
