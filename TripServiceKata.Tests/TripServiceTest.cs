@@ -17,12 +17,18 @@ namespace TripServiceKata.Tests
         public readonly Trip.Trip BRASIL = new Trip.Trip();
 
         private static User.User loggedInUser;
-        
+        private TripServiceForTests tripService;
+
+        [SetUp]
+        public void setUp()
+        {
+            tripService = new TripServiceForTests();
+        }
+
         [Test]
         [ExpectedException("TripServiceKata.Exception.UserNotLoggedInException")]
         public void it_should_validate_the_user_is_logged_in()
         {
-            TripServiceForTests tripService = new TripServiceForTests();
             loggedInUser = GUEST;
 
             tripService.GetTripsByUser(A_USER);
@@ -31,8 +37,8 @@ namespace TripServiceKata.Tests
         [Test]
         public void it_should_not_return_any_trips_when_users_are_not_friends()
         {
-            TripServiceForTests tripService = new TripServiceForTests();
             loggedInUser = REGISTERED_USER;
+            
             User.User stranger = new User.User();
             stranger.AddFriend(ANOTHER_USER);
             stranger.AddTrip(BRASIL);
